@@ -1,0 +1,12 @@
+<div class="article">
+    <div class="id">
+        Id: {{ article().id }}
+    </div>
+    <div class="text">
+        Text: {{ article().text }}
+    </div>
+</div>
+<div class="buttons">
+    <button class="btn" (click)="openArticle(article().id)">Update</button>
+    <button class="btn" (click)="store.removeArticle(article().id)">Remove</button>
+</div>

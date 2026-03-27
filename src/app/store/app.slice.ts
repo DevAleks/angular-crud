@@ -1,14 +1,11 @@
-export interface Articles {
-    readonly id: number;
-    readonly text: string;
-}
+import { Mode } from "../models/articles.model";
 
 export interface AppSlice {
-    readonly articles: Articles[];
+    readonly pageMode: Mode;
     readonly isBusy: boolean;
 }
 
 export const initialAppSlice: AppSlice = {
-    articles: [], 
+    pageMode: null,
     isBusy: false
 }

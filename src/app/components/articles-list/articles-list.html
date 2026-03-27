@@ -1,0 +1,16 @@
+@let articles = store.articlesList();
+
+<button class="btn" (click)="createNewArticle()">New article</button>
+
+<div class="divider"></div>
+
+<h1>{{articles.length}} Articles</h1>
+
+<div class="results">
+  @for (article of articles; track article.id) {
+    <app-article-item [article]="article" />     
+    @if (!$last) {
+      <div class="divider"></div>
+    }
+  }
+</div>

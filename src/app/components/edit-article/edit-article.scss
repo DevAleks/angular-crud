@@ -1,0 +1,93 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: stretch;
+
+    h1 {        
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 8px;
+        text-align: center;
+    }
+
+    .article {
+        flex-grow: 1;
+        flex-shrink: 1;
+        display: flex;
+        flex-direction: column;    
+        gap: 10px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        padding: 16px;
+        margin: 16px auto;
+        background: #f9f9f9;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        font-family: "Arial", sans-serif;
+
+        .id {
+            font-size: 18px;
+            color: #555;
+            font-style: italic;
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        .textarea {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            text-align: justify;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            padding: 16px;
+            margin: 16px auto;
+            width: 600px;
+            height: 300px;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-family: "Arial", sans-serif;
+        }
+
+        /* TODO*/
+        .text {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            text-align: justify;
+        }
+    }
+
+    .buttons {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .buttons button {
+        padding: 10px 20px;
+        font-size: 16px;
+        font-family: 'Arial', sans-serif;
+        font-weight: bold;
+        color: #fff;
+        background-color: #007BFF;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    
+    .buttons button:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+    
+    .buttons button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+
+
+}

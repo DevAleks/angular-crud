@@ -1,0 +1,27 @@
+<h1>
+    @if(isUpdateMode()) {
+        Update article
+    } @else if(isCreateMode()) {
+        Create new article
+    }
+</h1>
+
+<div class="article">
+    @if(isUpdateMode()) {
+        <div class="id">Id: {{ id() }}</div>
+    } 
+    <textarea 
+        #articleText            
+        [value]="article()"
+        [placeholder]="isCreateMode() ? 'Enter article text here...' : ''"
+        class="textarea"  
+    ></textarea>
+</div>        
+<div class="buttons">
+    @if(isUpdateMode()) {
+        <button (click)="store.updateArticle(id(), articleText.value)">Update Article</button>
+    } @else if(isCreateMode()) {
+        <button (click)="store.createArticle(articleText.value)">Create Article</button>
+    }
+    <button (click)="backToArticlesList()">Back</button>
+</div>
