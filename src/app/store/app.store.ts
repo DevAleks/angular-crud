@@ -17,24 +17,54 @@ export const AppStore = signalStore(
     withEntities(articleConfig), 
     withState(initialAppSlice),
     withComputed(store => ({
-        articlesList: computed(() => [...store.articlesEntities()].reverse())
+        articlesList: computed(() => [...store.articlesEntities()].reverse()),
     })),
     withMethods(store => ({
+        // Creates a new article
         createArticle: (value: string) => {
             patchState(store, addEntity({
                 id: Date.now(),
                 text: value,
+                selectionStart: 0,
+                selectionEnd: 0,
+                annotationText: '',
+                annotationColor: 'none',                
             }, articleConfig))
         },
+
+        // Removes article
         removeArticle: (id: number) => {
             patchState(store, removeEntity(id, articleConfig))
         },
+
+        // Updates a text value of the existing article
         updateArticle: (id: number, value: string) => {
             patchState(store,  updateEntity({ 
                 id, 
                 changes: { text: value } 
             }, articleConfig))
         },
+
+        // Updates an annotation of the existing article
+        updateAnnotation: (
+            id: number, 
+            text: string, 
+            color: string, 
+            rangeStart: number, 
+            rangeEnd: number
+        ) => {
+            patchState(store,  updateEntity({ 
+                id, 
+                changes: { 
+                    annotationText: text, 
+                    annotationColor: color, 
+                    selectionStart: rangeStart, 
+                    selectionEnd: rangeEnd, 
+                } 
+            }, articleConfig))
+        },
+
+        // Changes the page mode of the Edit-article component
         updatePageMode: (mode: Mode) => {
             patchState(store, { pageMode: mode })
         },

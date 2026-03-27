@@ -14,6 +14,9 @@
         #articleText            
         [value]="article()"
         [placeholder]="isCreateMode() ? 'Enter article text here...' : ''"
+        (select)="onSelectText()"
+        (focus)="restoreSelection()"
+        [class.temporary-focus]="isTempFocused()"
         class="textarea"  
     ></textarea>
 </div>        
@@ -25,3 +28,40 @@
     }
     <button (click)="backToArticlesList()">Back</button>
 </div>
+
+@if(isSelectedText() || (isAnnotation() && isUpdateMode())) {
+    <div class="annotation-wrapper">
+        <h2>Assign or edit an annotation</h2>
+        <div class="colors-selection">
+            <h3>Choose the color:</h3>
+
+            @for (item of colors(); track item.id) {
+                <div class="colors-radio" (mousedown)="preventFocusLoss($event)">
+                    <input 
+                        type="radio"
+                        name="colorsRadioGroup"
+                        [id]="item.id"
+                        [value]="item.value"
+                        [checked]="annotationColor() === item.value"
+                        (change)="setColor(item.value)"
+                        class="input-radio">
+                    <label [for]="item.id">&nbsp;{{ item.label }}</label>
+                </div>
+            }
+        </div>   
+
+        <div class="annotation-add">
+            <h3>Annotation text:</h3>
+            <input 
+                #annotationInput
+                type="text"
+                [value]="annotationText()"                 
+                [placeholder]="annotationText() ? '' : 'Enter annotation text...'"
+                class="annotation-input">
+        </div>
+    </div>
+    <div class="buttons">
+        <button (click)="updateAnnotation(annotationInput.value)">Update Annotation</button>
+    </div>
+
+}
