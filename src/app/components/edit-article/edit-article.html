@@ -22,7 +22,11 @@
 </div>        
 <div class="buttons">
     @if(isUpdateMode()) {
+        <!-- 
+        * Update article via store method, without RxJS 
         <button (click)="store.updateArticle(id(), articleText.value)">Update Article</button>
+         -->
+        <button (click)="updateArticleRxJS(id(), articleText.value)">Update Article</button>
     } @else if(isCreateMode()) {
         <button (click)="createArticle(articleText.value)">Create Article</button>
     }

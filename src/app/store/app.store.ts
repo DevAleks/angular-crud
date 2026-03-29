@@ -1,10 +1,15 @@
-import { getState, patchState, signalStore, type, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
+import { getState, patchState, signalStore, type, withComputed, withHooks, withMethods, withProps, withState } from '@ngrx/signals';
 import { initialAppSlice } from './app.slice';
 import { withDevtools } from '@angular-architects/ngrx-toolkit';
-import { computed, effect } from '@angular/core';
+import { computed, effect, inject } from '@angular/core';
 import { Article, Mode } from '../models/articles.model';
 import { addEntity, entityConfig, removeEntity, setAllEntities, updateEntity, withEntities } from '@ngrx/signals/entities';
 import { INIT_ARTICLES } from '../data/init-articles';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { switchMap, tap } from 'rxjs';
+import { tapResponse } from '@ngrx/operators';
+import { setBusy } from './app.updaters';
+import { MockBackendService } from '../mock-backend/mock-backend.service';
 
 const articleConfig = entityConfig({
     entity: type<Article>(),
@@ -16,6 +21,15 @@ export const AppStore = signalStore(
     { providedIn: 'root' },    
     withEntities(articleConfig), 
     withState(initialAppSlice),
+    withProps((_) => {
+        const _mockBackendService = inject(MockBackendService);
+
+        return {
+            _mockBackendService,
+            // TODO
+            //_notifications: inject(NotificationsService),
+        };
+    }),    
     withComputed(store => ({
         articlesList: computed(() => [...store.articlesEntities()].reverse()),
     })),
@@ -39,7 +53,7 @@ export const AppStore = signalStore(
 
         // Updates a text value of the existing article
         updateArticle: (id: number, value: string) => {
-            patchState(store,  updateEntity({ 
+            patchState(store, updateEntity({ 
                 id, 
                 changes: { text: value } 
             }, articleConfig))
@@ -68,6 +82,29 @@ export const AppStore = signalStore(
         updatePageMode: (mode: Mode) => {
             patchState(store, { pageMode: mode })
         },
+
+        // Updates a text of the existing article via RxJS method with error handling 
+        // and loading state management demonstration
+        updateArticleRxJS: (id: number, value: string) => {
+            rxMethod<string>(input$ => input$.pipe(
+                tap(_ => patchState(store, setBusy(true))),
+                switchMap((value) => store._mockBackendService
+                    .updateArticleWithDelay(id, value).pipe(
+                        tapResponse({
+                            next: value => patchState(store, updateEntity({ 
+                                id, 
+                                changes: { text: value } 
+                            }, articleConfig)), 
+                            error: err => {
+                                // store._notifications.error(`${err}`)
+                                console.error(err);
+                            },
+                            finalize: () => patchState(store, setBusy(false))
+                        })      
+                    )
+                )
+            ));
+        }
     })),
     withHooks(store => ({
         onInit: () => {

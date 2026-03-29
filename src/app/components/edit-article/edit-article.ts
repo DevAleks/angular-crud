@@ -268,4 +268,11 @@ export class EditArticle {
             return;
         }
     }
+
+    /**
+     * Update article via RxJS method
+     */
+    updateArticleRxJS(id: number, article: string): void {
+        this.store.updateArticleRxJS(id, article);
+    }    
 }
