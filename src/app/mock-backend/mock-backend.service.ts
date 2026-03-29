@@ -1,18 +1,13 @@
-import { inject, Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { delay, Observable, of, switchMap, tap, throwError } from "rxjs";
-import { AppStore } from "../store/app.store";
 
 @Injectable({providedIn: 'root'})
 export class MockBackendService {
-    // readonly store = inject(AppStore);
 
-    readonly #delays = [1000, 5000, 'error'];
+    readonly #delays = [1000, 4000, 'error'];
     #currentDelayIndex = -1;
 
     #updateArticle(id: number, article: string) {
-        
-        // TODO
-        // this.store.updateArticle(id, article);
         return article;
     }
 

@@ -26,94 +26,96 @@ export const AppStore = signalStore(
 
         return {
             _mockBackendService,
-            // TODO
-            //_notifications: inject(NotificationsService),
         };
     }),    
     withComputed(store => ({
         articlesList: computed(() => [...store.articlesEntities()].reverse()),
     })),
-    withMethods(store => ({
-        // Creates a new article
-        createArticle: (id: number, text: string) => {
-            patchState(store, addEntity({
-                id,
-                text,
-                selectionStart: 0,
-                selectionEnd: 0,
-                annotationText: '',
-                annotationColor: 'none',                
-            }, articleConfig))
-        },
-
-        // Removes article
-        removeArticle: (id: number) => {
-            patchState(store, removeEntity(id, articleConfig))
-        },
-
-        // Updates a text value of the existing article
-        updateArticle: (id: number, value: string) => {
-            patchState(store, updateEntity({ 
-                id, 
-                changes: { text: value } 
-            }, articleConfig))
-        },
-
-        // Updates an annotation of the existing article
-        updateAnnotation: (
-            id: number, 
-            text: string, 
-            color: string, 
-            rangeStart: number, 
-            rangeEnd: number
-        ) => {
-            patchState(store,  updateEntity({ 
-                id, 
-                changes: { 
-                    annotationText: text, 
-                    annotationColor: color, 
-                    selectionStart: rangeStart, 
-                    selectionEnd: rangeEnd, 
-                } 
-            }, articleConfig))
-        },
-
-        // Changes the page mode of the Edit-article component
-        updatePageMode: (mode: Mode) => {
-            patchState(store, { pageMode: mode })
-        },
-
+    withMethods(store => {
         // Updates a text of the existing article via RxJS method with error handling 
         // and loading state management demonstration
-        updateArticleRxJS: (id: number, value: string) => {
-            rxMethod<string>(input$ => input$.pipe(
-                tap(_ => patchState(store, setBusy(true))),
-                switchMap((value) => store._mockBackendService
-                    .updateArticleWithDelay(id, value).pipe(
-                        tapResponse({
-                            next: value => patchState(store, updateEntity({ 
-                                id, 
-                                changes: { text: value } 
-                            }, articleConfig)), 
-                            error: err => {
-                                // store._notifications.error(`${err}`)
-                                console.error(err);
-                            },
-                            finalize: () => patchState(store, setBusy(false))
-                        })      
-                    )
+        const updateArticleRxJS = rxMethod<{ id: number, value: string }>(input$ => input$.pipe(
+            tap(_ => patchState(store, setBusy(true))),
+            switchMap(({ id, value }) => store._mockBackendService
+                .updateArticleWithDelay(id, value).pipe(
+                    tapResponse({
+                        next: value => patchState(store, updateEntity({ 
+                            id, 
+                            changes: { text: value } 
+                        }, articleConfig)), 
+                        error: err => {
+                            // store._notifications.error(`${err}`)
+                            console.error(err);
+                        },
+                        finalize: () => patchState(store, setBusy(false))
+                    })      
                 )
-            ));
+            )
+        ));
+
+        return {
+            // Creates a new article
+            createArticle: (id: number, text: string) => {
+                patchState(store, addEntity({
+                    id,
+                    text,
+                    selectionStart: 0,
+                    selectionEnd: 0,
+                    annotationText: '',
+                    annotationColor: 'none',                
+                }, articleConfig))
+            },
+
+            // Removes article
+            removeArticle: (id: number) => {
+                patchState(store, removeEntity(id, articleConfig))
+            },
+
+            // Updates a text value of the existing article
+            updateArticle: (id: number, value: string) => {
+                patchState(store, updateEntity({ 
+                    id, 
+                    changes: { text: value } 
+                }, articleConfig))
+            },
+
+            // Updates an annotation of the existing article
+            updateAnnotation: (
+                id: number, 
+                text: string, 
+                color: string, 
+                rangeStart: number, 
+                rangeEnd: number
+            ) => {
+                patchState(store, updateEntity({ 
+                    id, 
+                    changes: { 
+                        annotationText: text, 
+                        annotationColor: color, 
+                        selectionStart: rangeStart, 
+                        selectionEnd: rangeEnd, 
+                    } 
+                }, articleConfig))
+            },
+
+            // Changes the page mode of the Edit-article component
+            updatePageMode: (mode: Mode) => {
+                patchState(store, { pageMode: mode })
+            },
+
+            // RxJS method for articles update
+            updateArticleRxJS
         }
-    })),
+    }),
     withHooks(store => ({
         onInit: () => {
-            patchState(store, setAllEntities(INIT_ARTICLES, articleConfig))
+            patchState(store, setAllEntities(INIT_ARTICLES, articleConfig));
             const stateJson = localStorage.getItem('app-store');
             if (stateJson) {
                 const state = JSON.parse(stateJson);
                 patchState(store, state);
             }
+            patchState(store, setBusy(false));
         
             effect(() => {
                 const state = getState(store);

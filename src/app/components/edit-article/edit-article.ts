@@ -1,26 +1,14 @@
-import {
-  afterNextRender,
-  Component,
-  computed,
-  effect,
-  ElementRef,
-  inject,
-  input,
-  linkedSignal,
-  numberAttribute,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { afterNextRender, Component, computed, effect, ElementRef, inject, input, linkedSignal, numberAttribute, signal, viewChild } from '@angular/core';
 import { AppStore } from '../../store/app.store';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AppConstants } from '../../shared/app.constants';
 
 @Component({
-  selector: 'app-edit-article',
-  imports: [CommonModule],
-  templateUrl: './edit-article.html',
-  styleUrl: './edit-article.scss',
+    selector: 'app-edit-article',
+    imports: [CommonModule],
+    templateUrl: './edit-article.html',
+    styleUrl: './edit-article.scss',
 })
 export class EditArticle {
     readonly store = inject(AppStore);
@@ -135,16 +123,15 @@ export class EditArticle {
             }
         });
 
-
         // TODO to be removed after testing
-        effect(() => {
-            // console.log('Id:', this.id());
-            // console.log('Выделенный текст:', this.selectedText());
-            // console.log('isUpdateMode: ', this.isUpdateMode());
-            // console.log('Аннотация текст: ', this.annotationText());
-            // console.log('New article Id: ', this.newArticleId());
-            // console.log('isNewA: ', this.newArticleId());
-        });
+        // effect(() => {
+        //     console.log('Id:', this.id());
+        //     console.log('Выделенный текст:', this.selectedText());
+        //     console.log('isUpdateMode: ', this.isUpdateMode());
+        //     console.log('Аннотация текст: ', this.annotationText());
+        //     console.log('New article Id: ', this.newArticleId());
+        //     console.log('isNewA: ', this.newArticleId());
+        // });
     }
 
     /**
@@ -273,6 +260,6 @@ export class EditArticle {
      * Update article via RxJS method
      */
     updateArticleRxJS(id: number, article: string): void {
-        this.store.updateArticleRxJS(id, article);
+        this.store.updateArticleRxJS({ id, value: article });
     }    
 }

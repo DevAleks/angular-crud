@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { AppStore } from './store/app.store';
 
-// TODO
 @Component({
     selector: 'app-root',
     imports: [RouterOutlet],
@@ -9,5 +9,5 @@ import { RouterOutlet } from '@angular/router';
     styleUrl: './app.scss'
 })
 export class App {
-
+    readonly store = inject(AppStore);
 }

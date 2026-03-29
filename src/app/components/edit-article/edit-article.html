@@ -1,3 +1,9 @@
+@if(store.isBusy()) {
+    <div class="spinner-overlay" id="spinner">
+        <div class="spinner"></div>
+    </div>
+}
+
 <h1>
     @if(isUpdateMode()) {
         Update article
