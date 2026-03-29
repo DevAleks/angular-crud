@@ -1,4 +1,4 @@
-import { afterNextRender, Component, computed, ElementRef, inject, input, linkedSignal, Renderer2, viewChild } from '@angular/core';
+import { afterNextRender, Component, computed, ElementRef, inject, input, linkedSignal, Renderer2, viewChild, } from '@angular/core';
 import { AppStore } from '../../store/app.store';
 import { Article } from '../../models/articles.model';
 import { Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { AppConstants } from '../../shared/app.constants';
 
 @Component({
     selector: 'app-article-item',
+    standalone: true,
     templateUrl: './article-item.html',
     styleUrl: './article-item.scss',
 })
@@ -15,9 +16,6 @@ export class ArticleItem {
     readonly #renderer = inject(Renderer2);
 
     readonly article = input.required<Article>();
-
-    // Getting a reference to the article text container
-    readonly articleWrap = viewChild<ElementRef<HTMLTextAreaElement>>('articleWrap');
 
     // Signal for the starting position of the selected text
     readonly rangeStart = linkedSignal(() => {
@@ -37,7 +35,7 @@ export class ArticleItem {
         return 0;
     });
 
-    // Signal for annotation color    
+    // Signal for annotation color
     readonly annotationColor = linkedSignal(() => {
         const id = this.article().id;
         if (id >= 0) {
@@ -46,7 +44,7 @@ export class ArticleItem {
         return 'none';
     });
 
-    // Signal for getting annotation text  
+    // Signal for getting annotation text
     readonly annotationText = linkedSignal(() => {
         const id = this.article().id;
         if (id >= 0) {
@@ -54,47 +52,21 @@ export class ArticleItem {
         }
         return '';
     });
-        
+
     // Signal to check if the annotation exists
     readonly isAnnotation = computed(() => {
         const text = this.annotationText();
-        const isRangeValid = (this.rangeStart() >= 0 && this.rangeEnd() >= 0) 
-            && (this.rangeEnd() > this.rangeStart());
+        const isRangeValid =
+          this.rangeStart() >= 0 && this.rangeEnd() >= 0 && this.rangeEnd() > this.rangeStart();
         return text && text.length > 0 && isRangeValid;
     });
 
-    constructor() {        
+    constructor() {
         afterNextRender(() => {
-            if(this.isAnnotation()) {
+            if (this.isAnnotation()) {
                 this.highlightText(this.rangeStart(), this.rangeEnd());
             }
         });
-    }    
-
-    /**
-     * Highlights the text in the article based on the provided start and end positions.
-     * It creates a span element with a specific background color and wraps the selected text.
-     * @param start - The starting position of the text to be highlighted.
-     * @param end - The ending position of the text to be highlighted.
-     */
-    highlightText(start: number, end: number) {        
-        const container = this.articleWrap()?.nativeElement;
-        const textNode = container?.firstChild;
-
-        if (textNode?.nodeType !== Node.TEXT_NODE) return;
-
-        const range = document.createRange();
-        range.setStart(textNode, start);
-        range.setEnd(textNode, end);
-
-        const span = this.#renderer.createElement('span');
-        this.#renderer.addClass(span, 'highlight');
-        this.#renderer.setStyle(span, 'background-color', this.annotationColor());        
-
-        // TODO
-        // this.#renderer.setAttribute(span, 'apptooltip', this.annotationText());
-
-        range.surroundContents(span);        
     }
 
     /**
@@ -108,5 +80,76 @@ export class ArticleItem {
     openArticle(id: number) {
         this.store.updatePageMode(AppConstants.ARTICLE_UPDATE);
         this.#router.navigate(['/articles', id]);
+    }
+
+    // Selected text highlighting and displaying of the annotation's tooltip
+
+    // Getting a reference to the article text container
+    readonly articleWrap = viewChild<ElementRef<HTMLElement>>('articleWrap');
+
+    /**
+     * Highlights the text in the article based on the provided start and end positions.
+     * It creates a span element with a specific background color and wraps the selected text.
+     * 
+     * @param start - The starting position of the text to be highlighted.
+     * @param end - The ending position of the text to be highlighted.
+     */
+    highlightText(start: number, end: number) {
+        const container = this.articleWrap()?.nativeElement;
+        const textNode = container?.firstChild;
+
+        if (textNode?.nodeType !== Node.TEXT_NODE) return;
+
+        const range = document.createRange();
+        range.setStart(textNode, start);
+        range.setEnd(textNode, end);
+
+        const span = this.#renderer.createElement('span');
+
+        this.#renderer.addClass(span, 'highlight');
+        this.#renderer.setStyle(span, 'background-color', this.annotationColor());
+
+        this.#addTooltipToElement(span, this.annotationText());
+
+        range.surroundContents(span);
+    }
+
+    /**
+     * Adds tooltip functionality to a dynamically created element.
+     *
+     * @param element - The element to add tooltip to
+     * @param tooltipText - The text to display in the tooltip
+     */
+    #addTooltipToElement(element: HTMLElement, tooltipText: string) {
+        let tooltipElement: HTMLElement | null = null;
+
+        const showTooltip = () => {
+            if (!tooltipElement && tooltipText) {
+                tooltipElement = this.#renderer.createElement('div');
+                this.#renderer.appendChild(tooltipElement, this.#renderer.createText(tooltipText));
+                this.#renderer.addClass(tooltipElement, 'custom-tooltip');
+                this.#renderer.setStyle(tooltipElement, 'position', 'absolute');
+                this.#renderer.setStyle(tooltipElement, 'background-color', '#333');
+                this.#renderer.setStyle(tooltipElement, 'color', '#fff');
+                this.#renderer.setStyle(tooltipElement, 'padding', '5px');
+                this.#renderer.setStyle(tooltipElement, 'border-radius', '4px');
+                this.#renderer.setStyle(tooltipElement, 'z-index', '1000');
+                this.#renderer.appendChild(document.body, tooltipElement);
+
+                const hostPos = element.getBoundingClientRect();
+                this.#renderer.setStyle(tooltipElement, 'top', `${hostPos.bottom + 5}px`);
+                this.#renderer.setStyle(tooltipElement, 'left', `${hostPos.left}px`);
+            }
+        };
+
+        const hideTooltip = () => {
+            if (tooltipElement) {
+                this.#renderer.removeChild(document.body, tooltipElement);
+                tooltipElement = null;
+            }
+        };
+
+        this.#renderer.listen(element, 'mouseenter', showTooltip);
+        this.#renderer.listen(element, 'mouseleave', hideTooltip);
     }
 }
