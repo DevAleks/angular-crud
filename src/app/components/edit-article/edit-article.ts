@@ -2,6 +2,7 @@ import {
   afterNextRender,
   Component,
   computed,
+  effect,
   ElementRef,
   inject,
   input,
@@ -118,6 +119,15 @@ export class EditArticle {
         return 'none';    
     });
 
+    readonly newArticleId = signal<number | null>(null);
+
+    readonly isNewArticleCreated = computed(() => {
+        if(this.newArticleId() !== null && this.newArticleId() as number >= 0) {
+            return true;
+        }
+        return false;
+    });
+
     constructor() {        
         afterNextRender(() => {
             if(this.isUpdateMode() && this.rangeStart() >= 0 && this.rangeEnd() >= 0) {
@@ -126,17 +136,36 @@ export class EditArticle {
         });
 
 
-        // TODO
-        // effect(() => {
-        //     console.log('Id:', this.id());
-        //     console.log('Выделенный текст:', this.selectedText());
-        //     console.log('isUpdateMode: ', this.isUpdateMode());
-        //     console.log('Аннотация текст: ', this.annotationText());
-        //     console.log('Аннотация цвет: ', this.annotationColor());
-        // });
-    }    
+        // TODO to be removed after testing
+        effect(() => {
+            // console.log('Id:', this.id());
+            // console.log('Выделенный текст:', this.selectedText());
+            // console.log('isUpdateMode: ', this.isUpdateMode());
+            // console.log('Аннотация текст: ', this.annotationText());
+            // console.log('New article Id: ', this.newArticleId());
+            // console.log('isNewA: ', this.newArticleId());
+        });
+    }
 
-    // Method for setting the selected text in the textarea based on the provided start and end positions.
+    /**
+     * Create the new article and store the Id of it in the component for possible
+     * usage for the annoptation creating
+     * 
+     * @param articleText - text of the created new article
+     */
+    createArticle(articleText: string): void {
+        const id = Date.now();
+        this.store.createArticle(id, articleText);
+        this.newArticleId.set(id);
+    }
+
+    /** 
+     * Method for setting the selected text in the textarea based on the provided start 
+     * and end positions of it.
+     * 
+     * @param start - strat of the selection
+     * @param end - end of the selection
+     */
     selectText(start: number, end: number) {
         const el = this.textArea()?.nativeElement;
         el?.focus(); 
@@ -209,7 +238,7 @@ export class EditArticle {
      * @param annotationText - text of the annotation
      * @return void 
      */
-    updateAnnotation(annotationText: string): void {
+    updateAnnotation(annotationText: string): void {        
         this.store.updateAnnotation(
             this.id(), 
             annotationText, 
@@ -217,5 +246,26 @@ export class EditArticle {
             this.rangeStart(), 
             this.rangeEnd()
         );
+    }
+
+    /**
+     * Create a new annotation method. It updates annotation text, color and selected range of the existing article.
+     * 
+     * @param annotationText - text of the annotation
+     * @return void 
+     */
+    createAnnotation(annotationText: string): void {
+        if (this.newArticleId() !== null && this.newArticleId() as number >= 0) {
+            this.store.updateAnnotation(
+                this.newArticleId() as number, 
+                annotationText, 
+                this.annotationColor() ?? 'none',
+                this.rangeStart(), 
+                this.rangeEnd()
+            );
+        } else {
+            console.warn('Article ID is not set for the annotation creation');
+            return;
+        }
     }
 }

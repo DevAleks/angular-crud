@@ -21,10 +21,10 @@ export const AppStore = signalStore(
     })),
     withMethods(store => ({
         // Creates a new article
-        createArticle: (value: string) => {
+        createArticle: (id: number, text: string) => {
             patchState(store, addEntity({
-                id: Date.now(),
-                text: value,
+                id,
+                text,
                 selectionStart: 0,
                 selectionEnd: 0,
                 annotationText: '',

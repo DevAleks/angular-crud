@@ -24,7 +24,7 @@
     @if(isUpdateMode()) {
         <button (click)="store.updateArticle(id(), articleText.value)">Update Article</button>
     } @else if(isCreateMode()) {
-        <button (click)="store.createArticle(articleText.value)">Create Article</button>
+        <button (click)="createArticle(articleText.value)">Create Article</button>
     }
     <button (click)="backToArticlesList()">Back</button>
 </div>
@@ -44,7 +44,8 @@
                         [value]="item.value"
                         [checked]="annotationColor() === item.value"
                         (change)="setColor(item.value)"
-                        class="input-radio">
+                        class="input-radio"
+                    >
                     <label [for]="item.id">&nbsp;{{ item.label }}</label>
                 </div>
             }
@@ -57,11 +58,27 @@
                 type="text"
                 [value]="annotationText()"                 
                 [placeholder]="annotationText() ? '' : 'Enter annotation text...'"
-                class="annotation-input">
+                class="annotation-input"
+            >
         </div>
     </div>
     <div class="buttons">
-        <button (click)="updateAnnotation(annotationInput.value)">Update Annotation</button>
+        @if(isUpdateMode()) {
+            <button (click)="updateAnnotation(annotationInput.value)">Update Annotation</button>
+        } @else if(isCreateMode()) {
+            @if(!isNewArticleCreated()) {
+                <div class="warning">
+                    <p>Please create an article first</p>
+                </div>
+            }
+            <button 
+                (click)="createAnnotation(annotationInput.value)" 
+                [disabled]="!isNewArticleCreated()"
+            >
+                Create Annotation
+            </button>
+        }
+        
     </div>
 
 }

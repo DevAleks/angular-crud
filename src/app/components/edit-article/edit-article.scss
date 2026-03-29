@@ -158,5 +158,13 @@
         }
     } 
 
-
+    .warning {
+        padding: 10px;
+        background-color: #ffcccc;
+        border: 1px solid #ff0000;
+        border-radius: 4px;
+        color: #a70000;
+        font-weight: bold;
+        text-align: center;
+    }
 }
